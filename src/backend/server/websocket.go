@@ -12,7 +12,8 @@ import (
 
 var upgrader = websocket.Upgrader{}
 
-func wsHandler(w http.ResponseWriter, r *http.Request) {
+
+func WSHandler(w http.ResponseWriter, r *http.Request) {
 	fmt.Println("Connection")
 
 	ws, err := upgrader.Upgrade(w, r, nil)
@@ -28,7 +29,6 @@ func wsHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	fmt.Printf("Got message: %#v\n", string(input))
 
 	number, parsed := new(big.Int).SetString(string(input), 10)
 	if !parsed {
@@ -49,9 +49,4 @@ func wsHandler(w http.ResponseWriter, r *http.Request) {
 
 		//time.Sleep(time.Second)
 	}
-}
-
-func NewServer() {
-	http.HandleFunc("/ws", wsHandler)
-	log.Fatal(http.ListenAndServe("localhost:8080", nil))
 }

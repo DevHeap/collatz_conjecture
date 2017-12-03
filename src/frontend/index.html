@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Collatz Conjunction</title>
+</head>
+<body>
+
+
+<form name="publish">
+    <input type="text" name="message">
+    <input type="submit" value="Отправить">
+</form>
+
+<div id="subscribe"></div>
+
+<script type="text/javascript">
+    var socket = new WebSocket("ws://localhost:8080/ws");
+
+    document.forms.publish.onsubmit = function() {
+        var outgoingMessage = this.message.value;
+
+        socket.send(outgoingMessage);
+        return false;
+    };
+
+    socket.onmessage = function(event) {
+        var incomingMessage = event.data;
+        showMessage(incomingMessage);
+    };
+
+    function showMessage(message) {
+        var messageElem = document.createElement('div');
+        messageElem.appendChild(document.createTextNode(message));
+        document.getElementById('subscribe').appendChild(messageElem);
+    }
+</script>
+
+</body>
+</html>
+
+
