@@ -1,16 +1,16 @@
 package server
 
-import "net/http"
 import (
-	"github.com/gorilla/websocket"
+	"fmt"
 	"log"
 	"math/big"
-	"backend/calc"
-	"fmt"
+	"net/http"
+
+	"../calc"
+	"github.com/gorilla/websocket"
 )
 
 var upgrader = websocket.Upgrader{}
-
 
 func wsHandler(w http.ResponseWriter, r *http.Request) {
 	fmt.Println("Connection")
@@ -21,7 +21,6 @@ func wsHandler(w http.ResponseWriter, r *http.Request) {
 		log.Print("Http Upgrade:", err)
 		return
 	}
-
 
 	_, input, err := ws.ReadMessage()
 	if err != nil {
@@ -41,7 +40,7 @@ func wsHandler(w http.ResponseWriter, r *http.Request) {
 	defer calculator.Stop()
 
 	for {
-		r := <- calculator.DataCh
+		r := <-calculator.DataCh
 		err = ws.WriteJSON(r)
 		if err != nil {
 			log.Print("Sending result:", err)
@@ -52,12 +51,7 @@ func wsHandler(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-func NewServer(){
+func NewServer() {
 	http.HandleFunc("/ws", wsHandler)
 	log.Fatal(http.ListenAndServe("localhost:8080", nil))
 }
-
-
-
-
-

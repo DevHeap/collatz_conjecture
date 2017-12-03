@@ -1,6 +1,6 @@
 package main
 
-import "backend/server"
+import "./server"
 
 func main() {
 	server.NewServer()

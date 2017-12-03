@@ -1,10 +1,11 @@
 package main
 
 import (
-	"backend/calc"
-	"math/big"
 	"fmt"
+	"math/big"
 	"time"
+
+	"../calc"
 )
 
 // Simple console interface for testing backend logic
@@ -21,13 +22,13 @@ func main() {
 
 	calculator := calc.NewCalculator(number, 4)
 
-	for{
-		r := <- calculator.DataCh
+	for {
+		r := <-calculator.DataCh
 		fmt.Println(
 			"Worker:", r.Offset,
 			"\tNumber: ", r.Number,
 			"\tPath Len:", len(r.Path),
-			"\tElapsed Time: ",r.Time)
+			"\tElapsed Time: ", r.Time)
 
 		time.Sleep(time.Millisecond * 500)
 	}
