@@ -1,0 +1,70 @@
+<!doctype html>
+<html lang="en">
+
+<head>
+
+    <meta charset="UTF-8">
+    
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    
+    <title>Collatz Conjecture Playground</title>
+    
+    <link rel="stylesheet" href="style/main.css">
+    
+    <link href="https://fonts.googleapis.com/css?family=Arsenal" rel="stylesheet"> 
+    
+</head>
+
+<body class="bg-gray-noise">
+
+    <section class="page-body">
+    
+        <div class="content shadow">
+        
+            <div class="content-m bg-gr-deep-blue">
+            
+                <div class="header h1">Collatz Conjecture Playground</div>
+                
+                <div class="ngrid cont">
+                
+                    <div class="part part-md p1of2 right">
+                        <p>
+                            By doing two operations on a number you will always come to 1.<br>
+                            If n1 is even then n2 = 1/2 n; if n1 is odd then n2 = 3n + 1.<br>
+                            Every nm is a part of sequence. Stop on n = 1.
+                        </p>
+                    </div>
+                    
+                    <div class="part part-md p1of2">
+                        
+                        <div class="form-line">
+                            <input class="collatz-form-item field" id="collatzNumber" type="number" value="0" required>
+                        </div>
+                    
+                        <div class="form-line">
+                            <input class="collatz-form-item button" id="collatzAction" type="button" value="Start">
+                        </div>
+                    
+                    </div>
+                </div>
+            
+            </div>
+            
+            <div id="collatzResults" class="content-m bg-white">
+            
+                <div class="header h3">Results</div>
+            
+                <div id="collatzOutput"></div>
+            
+            </div>
+            
+        </div>
+        
+    </section>
+    
+    <script src="script/jquery.js"></script>
+    <script src="script/main.js"></script>
+    
+</body>
+
+</html>
