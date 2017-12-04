@@ -150,7 +150,8 @@ $(document).ready(function(){
         $answers.queue(function(){
             // limit shown elements by removing oldest
             var size = $answers.children().length;
-            if((size > max_answers) && (size % Math.floor(max_answers / 3) == 0)){ // let 1/3 more of max to stay
+            if((size > max_answers) && (size % Math.floor(max_answers / 3) == 0)){ // let 1/3 more 
+of max to stay
                 $answers.children().remove(":lt(" + (size - max_answers) + ")");
                 Scroll.update($answers[0]); // better smooth scroll
             }
@@ -183,7 +184,8 @@ $(document).ready(function(){
     // onpage log
     function logDebug(data){
         var dt = new Date();
-        var message = dt.getHours() + ':' + dt.getMinutes()+ ':' + dt.getSeconds() + ' - ' + data + '\n';
+        var message = dt.getHours() + ':' + dt.getMinutes()+ ':' + dt.getSeconds() + ' - ' + data 
++ '\n';
         $debug.append(message).animate({scrollTop: $debug[0].scrollHeight}, 200, 'swing');
     }
     
@@ -213,7 +215,8 @@ $(document).ready(function(){
                 yaxis: { title : "Count", titlefont: font, tickfont: font },
                 showlegend: false,
             };
-            Plotly.newPlot($histogram[0], [{y: Histogram.values, type: 'bar'}], layout, {staticPlot: true}); // plot
+            Plotly.newPlot($histogram[0], [{y: Histogram.values, type: 'bar'}], layout, 
+{staticPlot: true}); // plot
             $(window).on('resize', function(){
                 Plotly.Plots.resize($histogram[0]);
             });
@@ -247,7 +250,8 @@ $(document).ready(function(){
             };
             
             ws.onclose = function(ev){
-                logDebug('Connection is closed (' + ev.code + ')'); // console.log('ws closed: ' + ev.code);
+                logDebug('Connection is closed (' + ev.code + ')'); // console.log('ws closed: ' + 
+ev.code);
                 
                 $button.attr('data-opened', 'false').removeAttr('disabled').val('Start');
             };
@@ -324,3 +328,4 @@ $(document).ready(function(){
     example();
     
 });
+
