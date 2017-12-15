@@ -11,7 +11,7 @@
     
     <link rel="stylesheet" href="style/main.css">
     
-    <link href="https://fonts.googleapis.com/css?family=Arsenal" rel="stylesheet"> 
+    <link href="https://fonts.googleapis.com/css?family=Cuprum" rel="stylesheet"> 
     
 </head>
 
@@ -28,31 +28,48 @@
                 <div class="ngrid cont">
                 
                     <div class="part part-md p1of2 right">
-                        <p>
-                            By doing two operations on a number you will always come to 1.<br>
-                            If n1 is even then n2 = 1/2 n; if n1 is odd then n2 = 3n + 1.<br>
-                            Every nm is a part of sequence. Stop on n = 1.
+                    
+                        <h5>Collatz Conjecture Sequence</h5>
+                        <p>By doing two operations on a number you will always come to 1.<br>
+                        If n1 is even then n2 = 1/2 n; if n1 is odd then n2 = 3n + 1.<br>
+                        Every n is a part of sequence. Stop on n = 1.<br>
+                        <div class="button" id="collatzExample">Example</div>
                         </p>
+                    
+                        <h5>Server Features and Optimizations</h5>
+                        <p>(Alyona is preparing text)</p>
+                        
                     </div>
                     
                     <div class="part part-md p1of2">
                         
                         <div class="form-line">
                             <input class="collatz-form-item field" id="collatzNumber" type="number" value="0" required>
+                            <div class="button" id="collatzRandom">Randomize</div>
+                            
                         </div>
                     
                         <div class="form-line">
                             <input class="collatz-form-item button" id="collatzAction" type="button" value="Start">
                         </div>
                     
+                        <div class="form-line">
+                            <textarea class="field collatz-form-item" id="debugOutput" rows="5"></textarea>
+                        </div>
+                    
                     </div>
+                    
                 </div>
             
             </div>
             
             <div id="collatzResults" class="content-m bg-white">
+                
+                <div class="header h3">Histogram</div>
             
-                <div class="header h3">Results</div>
+                <div id="collatzHistogram"></div>
+                
+                <div class="header h3">Answers</div>
             
                 <div id="collatzOutput"></div>
             
@@ -63,7 +80,7 @@
     </section>
     
     <script src="script/jquery.js"></script>
-    <script src="script/main.js"></script>
+    <script defer src="script/main.js"></script>
     
 </body>
 
