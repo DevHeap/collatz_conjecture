@@ -10,6 +10,11 @@ import (
 	"time"
 )
 
+const base = 10
+const workers = 4
+const maxMsgRatio = time.Millisecond * 200
+
+
 var upgrader = websocket.Upgrader{
 	CheckOrigin: func(r *http.Request) bool {return true},
 }
@@ -35,18 +40,18 @@ func WSHandler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	//
-	number, parsed := new(big.Int).SetString(string(input), 10)
+	number, parsed := new(big.Int).SetString(string(input), base)
 	if !parsed {
-		log.Print("Unable to parse string into integer number with base 10", err)
+		log.Print("Unable to parse string into integer number", err)
 		return
 	}
 
 	//Create calculator with start number
-	calculator := calc.NewCalculator(number, 4)
+	calculator := calc.NewCalculator(number, workers)
 	defer calculator.Stop()
 
 	//Cause we can be too fast in sending results to client, we limit it
-	limiter := time.NewTicker(time.Millisecond * 200)
+	limiter := time.NewTicker(maxMsgRatio)
 	defer limiter.Stop()
 
 	//Main handler loop
