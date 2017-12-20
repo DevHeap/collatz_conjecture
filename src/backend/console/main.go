@@ -25,9 +25,8 @@ func main() {
 	for {
 		r := <-calculator.DataCh
 		fmt.Println(
-			"Worker:", r.Offset,
 			"\tNumber: ", r.Number,
-			"\tPath Len:", len(r.Path),
+			"\tPath Len:", r.PathLength,
 			"\tElapsed Time: ", r.Time)
 
 		time.Sleep(time.Millisecond * 500)
