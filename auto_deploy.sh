@@ -2,6 +2,12 @@
 DIR=$1
 echo Working directory: $DIR
 
+kill -9 $(/sbin/pidof backend)
+pushd src/backend
+GOPATH=$HOME/go go build || exit 1
+./backend &
+
+
 CURRENT_HASH=$(git rev-parse HEAD)
 while true; do
     echo Checking updates
@@ -12,9 +18,9 @@ while true; do
     if [[ $CURRENT_HASH != $NEW_HASH ]]; then
         echo New version availible, restarting server
         CURRENT_HASH=$NEW_HASH
-	kill -9 $(pidof backend)
+	kill -9 $(/sbin/pidof backend)
         pushd src/backend
-        GOPATH=/root/go go build
+        GOPATH=$HOME/go go build
         ./backend &
         popd
     fi
