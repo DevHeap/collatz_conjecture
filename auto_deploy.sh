@@ -5,7 +5,7 @@ echo Working directory: $DIR
 kill -9 $(/sbin/pidof backend)
 pushd src/backend
 GOPATH=$HOME/go go build || exit 1
-./backend &
+./backend --addr 0.0.0.0:8080 &
 
 
 CURRENT_HASH=$(git rev-parse HEAD)
@@ -21,7 +21,7 @@ while true; do
 	kill -9 $(/sbin/pidof backend)
         pushd src/backend
         GOPATH=$HOME/go go build
-        ./backend &
+        ./backend --addr 0.0.0.0:8080 &
         popd
     fi
 
