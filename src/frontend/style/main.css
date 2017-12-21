@@ -199,10 +199,7 @@ body { font-family: Cuprum, sans-serif; }
     border-radius: 0.5rem;
 }
 
-#collatzNumber {
-    
-}
-
+#collatzNumber { }
 
 #collatzAction {
     min-width: 40%;
@@ -213,27 +210,44 @@ body { font-family: Cuprum, sans-serif; }
     cursor: progress;
 }
 
-#collatzRandom {
-    
-}
+#collatzRandom { }
 
 #collatzResults {
-    display: none;
+    display: ;
+}
+
+#collatzHistogram,
+#collatzOutput {
+    height: 50rem;
+}
+
+#collatzHistogram {
+    width: 100%;
 }
 
 #collatzOutput {
+    padding: 0.5rem;
+    position: relative;
     overflow-x: hidden;
     overflow-y: scroll;
-    height: 50rem;
 }
+
+/*#collatzOutput::after{
+    display: block; content: "";
+    position: sticky;
+    bottom: -0.5rem; left: 0; right: 0;
+    height: 2rem; margin-top: -2rem;
+    background: linear-gradient(to bottom, rgba(255,255,255,0), rgba(255,255,255,1));
+}*/
 
 #collatzOutput .item {
     height: 3.5rem; padding: 0.5rem 1rem;
     font-size: 2rem; line-height: 1.25;
     overflow: hidden; text-overflow: ellipsis;
-    white-space: nowrap; 
+    white-space: nowrap; position: relative;
+    background-color: rgba(255,255,255,0.5);
     border: 0.125rem solid rgba(0,0,0,0.1);
-    animation: highlight 4.7s ease-out, slide-down 0.7s ease;
+    animation: highlight 0.9s ease-out, slide-down 0.5s ease;
 }
 
 #collatzOutput .item + .item {
@@ -246,12 +260,18 @@ body { font-family: Cuprum, sans-serif; }
 }
 
 @keyframes slide-down {
-    from { /*height: 0rem;*/ opacity: 0; }
-    to { /*height: 3.5rem;*/ opacity: 1; }
+    from { opacity: 0; transform: translateY(-100%); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+#collatzExampleButton {}
+#collatzExampleResult {
+    font-size: 2rem;
 }
 
 #debugOutput {
     font-size: 2rem;
+    font-family: monospace;
 }
 
 
