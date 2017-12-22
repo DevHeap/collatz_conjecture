@@ -1,42 +1,104 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
+
     <meta charset="UTF-8">
-    <title>Collatz Conjunction</title>
+    
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    
+    <title>Collatz Conjecture Playground</title>
+    
+    <link rel="stylesheet" href="style/main.css">
+    
+    <link href="https://fonts.googleapis.com/css?family=Cuprum" rel="stylesheet"> 
+    
 </head>
-<body>
 
+<body class="bg-gray-noise">
 
-<form name="publish">
-    <input type="text" name="message">
-    <input type="submit" value="Отправить">
-</form>
-
-<div id="subscribe"></div>
-
-<script type="text/javascript">
-    var socket = new WebSocket("ws://localhost:8080/ws");
-
-    document.forms.publish.onsubmit = function() {
-        var outgoingMessage = this.message.value;
-
-        socket.send(outgoingMessage);
-        return false;
-    };
-
-    socket.onmessage = function(event) {
-        var incomingMessage = event.data;
-        showMessage(incomingMessage);
-    };
-
-    function showMessage(message) {
-        var messageElem = document.createElement('div');
-        messageElem.appendChild(document.createTextNode(message));
-        document.getElementById('subscribe').appendChild(messageElem);
-    }
-</script>
-
+    <section class="page-body">
+    
+        <div id="collatz" class="content shadow">
+        
+            <div class="content-m bg-gr-deep-blue">
+            
+                <div class="header h1">The Greatest Collatz Conjecture Playground Ever Existed by DevHeap</div>
+                
+                <div class="ngrid cont">
+                
+                    <div class="part part-md p1of2 right">
+                    
+                        <h4>CC Sequence</h4>
+                        <p>
+                            By doing two operations on a number you will always come to 1.<br>
+                            If n1 is even then n2 = 1/2 n; if n1 is odd then n2 = 3n + 1.<br>
+                            Every n is a part of sequence. Stop on n = 1.
+                        </p>
+                        
+                        <h4>Example</h4>
+                        <div id="collatzExample" class="collapsed">Calculating...</div>
+                    
+                        <h4>Server Features and Optimizations</h4>
+                        <p>Ask Alyona: @NIMFETRISA</p>
+                        
+                    </div>
+                    
+                    <div class="part part-md p1of2">
+                    
+                        <p>Enter any number and press Start.</p>
+                        
+                        <div class="form-line">
+                            <input class="collatz-form-item field" id="collatzNumber" type="number" value="0" required>
+                        </div>
+                    
+                        <div class="form-line">
+                            <div class="button" id="collatzRandom">Randomize</div>
+                        </div>
+                    
+                        <div class="form-line">
+                            <input class="collatz-form-item button" id="collatzAction" type="button" value="Start">
+                            <textarea class="field collatz-form-item" id="collatzDebug" rows="3" disabled></textarea>
+                        </div>
+                    
+                    </div>
+                    
+                </div>
+            
+            </div>
+            
+            <div id="collatzResults" class="content-m bg-white">
+                
+                <div class="ngrid cont">
+                
+                    <div class="part part-md p1of2 right">
+                    
+                        <div class="header h3">Histogram</div>
+            
+                        <div id="collatzHistogram"></div>
+                        
+                    </div>
+                    
+                    <div class="part part-md p1of2">
+                        
+                        <div class="header h3">Answers</div>
+                        
+                        <div id="collatzOutput"></div>
+                    
+                    </div>
+                    
+                </div>
+            
+            </div>
+            
+        </div>
+        
+    </section>
+    
+    <script src="script/jquery.js"></script>
+    <script type="text/javascript" src="https://cdn.plot.ly/plotly-latest.min.js"></script>
+    <script defer src="script/main.js"></script>
+    
 </body>
+
 </html>
-
-
