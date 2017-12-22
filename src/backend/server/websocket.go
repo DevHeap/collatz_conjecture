@@ -39,12 +39,25 @@ func WSHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	//
+	//Parsing initial number into big math integer
 	number, parsed := new(big.Int).SetString(string(input), base)
 	if !parsed {
 		log.Print("Unable to parse string into integer number", err)
 		return
 	}
+
+	// Gorutine to handle close messages from client
+	// From gorilla library websocket docs:
+	//   "If the application is not otherwise interested in messages from the peer,
+	//   then the application should start a goroutine to read and discard messages from the peer"
+	go func(ws *websocket.Conn){
+		for {
+			if _, _, err := ws.NextReader(); err != nil {
+				ws.Close()
+				return
+			}
+		}
+	}(ws)
 
 	//Create calculator with start number
 	calculator := calc.NewCalculator(number, workers)
