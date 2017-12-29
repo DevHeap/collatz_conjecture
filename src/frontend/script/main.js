@@ -22,7 +22,7 @@ Math.collatzSequence = function(num){
 $(document).ready(function(){
 
     // server url (ws/wss)
-    var ws_url = 'ws://devheap.org:8080/ws'; // test server: 'wss://echo.websocket.org'
+    var ws_url = "ws://" + location.host + "/ws"; //'ws://devheap.org:8080/ws';
     var ws; // global scope for websocket instance
     
     var minimum = 3; // 1 is done, 2 is only 1 step, 3 is okay.

@@ -2,18 +2,18 @@ package main
 
 import (
 	"./server"
-	"net/http"
-	"log"
 	"flag"
+	"log"
+	"net/http"
 )
-var address = flag.String("addr", "localhost:8080", "http service address")
-var dir     = flag.String("dir",  "src/frontend/", "path to front files")
+
+var address = flag.String("address", "0.0.0.0:80", "external address for server")
+var static = flag.String("static", "src/frontend/", "path to static files")
 
 func main() {
 	flag.Parse()
 
-	log.Println(dir)
-	http.Handle("/", http.FileServer(http.Dir(*dir)))
+	http.Handle("/", http.FileServer(http.Dir(*static)))
 	http.HandleFunc("/ws", server.WSHandler)
 	log.Fatal(http.ListenAndServe(*address, nil))
-}
+	}
