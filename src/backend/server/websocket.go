@@ -8,17 +8,16 @@ import (
 	"../calc"
 	"github.com/gorilla/websocket"
 	"time"
+	"strings"
 )
 
 const base = 10
 const workers = 4
 const maxMsgRatio = time.Millisecond * 200
 
-
 var upgrader = websocket.Upgrader{
 	CheckOrigin: func(r *http.Request) bool {return true},
 }
-
 
 func WSHandler(w http.ResponseWriter, r *http.Request) {
 	log.Print("Accepted Connection")
@@ -33,14 +32,28 @@ func WSHandler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	//Waiting for string with initial number
-	_, input, err := ws.ReadMessage()
+	_, inputBytes, err := ws.ReadMessage()
 	if err != nil {
 		log.Print("Reading input number:", err)
 		return
 	}
 
-	//Parsing initial number into big math integer
-	number, parsed := new(big.Int).SetString(string(input), base)
+	input := string(inputBytes)
+
+	// Check that input is non-zero
+	if strings.HasPrefix(input, "0") {
+		log.Print("Zero as input numbers are forbidden")
+		return
+	}
+
+	// Check that input is positive
+	if strings.HasPrefix(input, "-") {
+		log.Print("Negative input numbers are forbidden")
+		return
+	}
+
+	//
+	number, parsed := new(big.Int).SetString(input, base)
 	if !parsed {
 		log.Print("Unable to parse string into integer number", err)
 		return

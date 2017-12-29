@@ -28,6 +28,7 @@ func step(x *big.Int) *big.Int{
 func FindPath(x *big.Int) []*big.Int {
 	var path []*big.Int
 
+	path = append(path, x)
 
 	for x.Cmp(one) > 0{
 		x = step(x)
