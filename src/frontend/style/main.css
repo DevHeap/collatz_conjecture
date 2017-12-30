@@ -240,6 +240,10 @@ body { font-family: Cuprum, sans-serif; }
     overflow-y: scroll;
 }
 
+#collatzOutput.autoscroll {
+    overflow-y: hidden;
+}
+
 /*#collatzOutput::after{
     display: block; content: "";
     position: sticky;
@@ -323,4 +327,4 @@ body { font-family: Cuprum, sans-serif; }
 .o3of4 { margin-left: 75%; } .o3of5 { margin-left: 60%; } .o4of5 { margin-left: 80%; }
 @media (max-width: 480px) { .part.part-sm { width: 100%; } .ngrid.cont > .part + .part.part-sm { padding-top: 2rem; } }
 @media (max-width: 720px) { .part.part-md { width: 100%; } .ngrid.cont > .part + .part.part-md { padding-top: 2rem; } }
-@media (min-width: 1024px) { .part.part-lg { width: 100%; } .ngrid.cont > .part + .part.part-lg { padding-top: 2rem; } }
+@media (max-width: 1024px) { .part.part-lg { width: 100%; } .ngrid.cont > .part + .part.part-lg { padding-top: 2rem; } }

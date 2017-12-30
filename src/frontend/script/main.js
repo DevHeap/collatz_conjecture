@@ -21,8 +21,10 @@ Math.collatzSequence = function(num){
 // when page is ready
 $(document).ready(function(){
 
+    // localhost replace
+    var host = (location.host.length == 0) ? 'collatz.devheap.org' : location.host;
     // server url (ws/wss)
-    var ws_url = "ws://" + location.host + "/ws"; //'ws://devheap.org:8080/ws';
+    var ws_url = 'wss://' + host + '/ws'; // test server: 'wss://echo.websocket.org'
     var ws; // global scope for websocket instance
     
     var minimum = 3; // 1 is done, 2 is only 1 step, 3 is okay.
@@ -42,7 +44,7 @@ $(document).ready(function(){
 
     // Histogram singleton for collecting stats
     Histogram = {
-        values: [0], total: 0, maximum: 0,
+        values: [0], total: 0, maximum: 0, time: 0,
         reset: function(){
             this.values = [0];
             this.total = 0;
@@ -63,7 +65,39 @@ $(document).ready(function(){
             return this.values.reduce(function(a, b, i){
                 return a + ', ' + i + ':' + b;
             });
-        }
+        },
+        outdated: function(sec){
+            if((Date.now() - this.time) > (sec * 1000)){
+                this.time = Date.now();
+                return true;
+            } else return false;
+        },
+    };
+    
+    // Scroll object (aka kostil)
+    Scroll = {
+        height: 0, position: 0, target: 0,
+        interval: 1000 * 1/3, time: 0, easing: 3/5, // more magic numbers
+        moving: function(){
+            return (this.position < this.target);
+        },
+        ready: function(){
+            return (Date.now() - this.time) > (this.interval);
+        },
+        update: function(el){
+            this.height = el.scrollHeight;
+            this.position = el.scrollTop + el.clientHeight;
+            this.target = this.position + Math.floor((this.easing) * (this.height-this.position));
+        },
+        smooth: function(element){
+            this.update(element[0]);
+            if(this.moving() && this.ready()){
+                element.animate({
+                    scrollTop: (this.target - element.height() - 1)
+                }, this.interval - 10, 'linear');
+                this.time = Date.now();
+            }
+        },
     };
     
     // fast way to create element (in theory)
@@ -80,6 +114,8 @@ $(document).ready(function(){
     // adds answer
     function addAnswer(data){
         
+        counter++;
+        
         var result, itemid, maximum = 100;
         
         // prepare string
@@ -89,28 +125,26 @@ $(document).ready(function(){
                 'Path length: ' + data['PathLength'],
                 'Highest: ' + data['MaxNumber'],
                 'Average: ' + data['AverageNumber'],
-                'Calc time: ' + (data['Time']/1000) + 'ms', // is it really ms?
+                'Calc time: ' + (data['Time']/1000000) + 'ms',
             ];
             result = elements.join(', ');
             itemid = 'number_' + data['Number'];
         } else {
             result = data;
-            itemid = 'item_'+(counter++);
+            itemid = 'item_'+(counter);
         }
         
         // queue
         $answers.queue(function(){
             // limit shown elements by removing oldest
-            if(counter>=maximum) {
-                $(this).children().first().queue(function(){
-                    $(this).remove();
-                });
+            var size = $answers.children().length;
+            if((size > maximum) && (size % (maximum / 3) == 0)){ // let 1/3 more of max to stay
+                $answers.children().remove(":lt(" + (size - maximum) + ")");
             }
             // add result
             var item = createItem(result, itemid);
             $(this).append(item).ready(function(){
-                // smooth scroll
-                item.scrollIntoView({block: "end", behavior: "smooth"}); // TODO: fix page scroll
+                Scroll.smooth($answers);
             });
             // next please
             $(this).dequeue();
@@ -120,14 +154,15 @@ $(document).ready(function(){
     
     // updates histogram
     function updateHistogram(data){
-        var update = 3 * 7; // magic number
+        var interval = 2; // in seconds
         if (typeof data === 'object'){
             Histogram.add(data['PathLength']);
         } else {
             // Histogram.add(Math.logRand(1,666)); // TESTing (histogram)
         }
-        if(Histogram.total % update == 0){
-            Plotly.relayout($histogram[0], {y: Histogram.values});
+        if(Histogram.outdated(interval)){
+            Plotly.restyle($histogram[0], 'y', [Histogram.values]);
+            // Plotly.relayout($histogram[0], {y: Histogram.values});
         }
     }
     
@@ -146,16 +181,22 @@ $(document).ready(function(){
             
             // clear output
             $answers.html('');
+            $answers.addClass('autoscroll');
             
             // histogram init
             Histogram.reset();
-            Plotly.plot($histogram[0], [{y: Histogram.values, type: 'bar'}], {showlegend: false}, {staticPlot: true});
-            
-            counter = 0; // ugly...
+            Plotly.newPlot($histogram[0], [{y: Histogram.values, type: 'bar'}], {showlegend: false}, {staticPlot: true}); // plot
+            $(window).on('resize', function(){
+                Plotly.Plots.resize($histogram[0]);
+            });
             
             // new connection
-            ws = new WebSocket(ws_url);
-            logDebug('Connection attempt');
+            try{
+                ws = new WebSocket(ws_url);
+                logDebug('Connection attempt');
+            } catch (e) {
+                logDebug('Fail to connect: ' + e.name + "; " + e.message); // + "\n" + e.stack
+            }
             
             ws.onopen = function(){
                 logDebug('Connection is opened'); // console.log('ws opened');
@@ -185,10 +226,10 @@ $(document).ready(function(){
             
             /* TESTing (answer adding)
             var test = setInterval(function(){
-                var rand = Math.random()*10;
-                for(var i = 0; i < rand; i++){ addAnswer('test '+counter); }
+                var rand = Math.random()*5;
+                for(var i = 0; i < rand; i++){ addAnswer('test ' + Date.now()); }
             }, 100);
-            setTimeout(function(){clearInterval(test)}, 10000);
+            setTimeout(function(){clearInterval(test)}, 30000);
             //*/
             
         } else {
@@ -196,6 +237,8 @@ $(document).ready(function(){
             $button.attr('disabled','disabled').val('Disconnecting...');
             
             ws.close();
+            
+            $answers.removeClass('autoscroll');
             
         }
         
