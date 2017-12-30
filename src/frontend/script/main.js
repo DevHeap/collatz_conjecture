@@ -303,11 +303,6 @@ $(document).ready(function(){
         $example.html('Path for '+ value +' is ' + result.join(' &gt; '));
     }
     
-    function randN(){
-        $input.val(Math.logRand(n_minimum, n_maximum));
-        example();
-    }
-    
     $button.attr('data-opened', 'false');
     
     $button.on('click',  function(ev){
