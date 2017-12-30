@@ -290,6 +290,11 @@ $(document).ready(function(){
         $example.text('Path for '+ value +' is ' + result.join(' > '));
     }
     
+    function randN(){
+        $input.val(Math.logRand(n_minimum, n_maximum));
+        example();
+    }
+    
     $button.attr('data-opened', 'false');
     
     $button.on('click',  function(ev){
