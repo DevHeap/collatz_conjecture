@@ -14,7 +14,7 @@ type Calculator struct {
 	cache *Cache
 }
 
-func NewCalculator(start *big.Int, workersCount int) Calculator {
+func NewCalculator(start *big.Int, workersCount int, cache *Cache) Calculator {
 	stopCh := make(chan struct{})
 	dataCh := make(chan Result, 4)
 
@@ -25,7 +25,7 @@ func NewCalculator(start *big.Int, workersCount int) Calculator {
 		step:   big.NewInt(int64(workersCount)),
 		stopCh: stopCh,
 
-		cache: NewCache(),
+		cache: cache,
 	}
 
 	for i := 0; i < workersCount; i++ {

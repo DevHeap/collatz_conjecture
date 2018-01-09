@@ -2,10 +2,10 @@ package calc
 
 import (
 	"encoding/json"
+	"log"
 	"math/big"
 	"sort"
 	"sync"
-	"log"
 )
 
 type record struct {
@@ -18,14 +18,14 @@ type Cache struct {
 	maxCount  int
 	minLength int
 
-	index     []record
-	storage   map[string][]byte
+	index   []record
+	storage map[string][]byte
 }
 
 func NewCache() *Cache {
 
 	return &Cache{
-		maxCount: 300,
+		maxCount:  300,
 		minLength: 0,
 
 		index:   make([]record, 0),
@@ -35,7 +35,7 @@ func NewCache() *Cache {
 
 func (c *Cache) Get(number *big.Int) (Result, bool) {
 	key := number.String()
-
+	log.Print("Cache get" + key)
 	c.RLock()
 	defer c.RUnlock()
 
@@ -55,7 +55,8 @@ func (c *Cache) Put(number *big.Int, result *Result) {
 	defer c.Unlock()
 
 	// Check length, call for real put only if needed
-	if result.PathLength > c.minLength {
+
+	if len(c.index) < c.maxCount || result.PathLength > c.minLength {
 		c.put(number, result)
 		log.Print("Cache update")
 	}
@@ -75,6 +76,7 @@ func (c *Cache) put(number *big.Int, result *Result) {
 
 	// if index contains more than max count, remove minimal
 	if len(c.index) > c.maxCount {
+		log.Println("Cache shrinking")
 		// removing minimal element from map
 		delete(c.storage, c.index[0].key)
 
@@ -87,7 +89,6 @@ func (c *Cache) put(number *big.Int, result *Result) {
 
 	// updating minimal length
 	c.minLength = c.index[0].length
-
 	// TODO update database here
 }
 

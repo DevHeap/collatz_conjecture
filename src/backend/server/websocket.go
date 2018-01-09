@@ -19,6 +19,8 @@ var upgrader = websocket.Upgrader{
 	CheckOrigin: func(r *http.Request) bool {return true},
 }
 
+var cache = calc.NewCache()
+
 func WSHandler(w http.ResponseWriter, r *http.Request) {
 	log.Print("Accepted Connection")
 
@@ -73,7 +75,7 @@ func WSHandler(w http.ResponseWriter, r *http.Request) {
 	}(ws)
 
 	//Create calculator with start number
-	calculator := calc.NewCalculator(number, workers)
+	calculator := calc.NewCalculator(number, workers, cache)
 	defer calculator.Stop()
 
 	//Cause we can be too fast in sending results to client, we limit it
