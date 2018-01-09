@@ -20,7 +20,6 @@ Math.collatzSequence = function(num){
 
 // when page is ready
 $(document).ready(function(){
-
     // default ws address if front launched from file
     var def_host = 'collatz.devheap.org';
     var def_proto = 'wss:';
@@ -35,7 +34,7 @@ $(document).ready(function(){
     
     // ws server url
     var ws_url = ws_proto + '//' + ws_host + '/ws'; // test server: 'wss://echo.websocket.org'
-    
+
     var ws; // global scope for websocket instance
     
     var n_minimum = 1; // collatz min
