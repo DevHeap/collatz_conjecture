@@ -324,5 +324,3 @@ $(document).ready(function(){
     example();
     
 });
-
-// rebase
