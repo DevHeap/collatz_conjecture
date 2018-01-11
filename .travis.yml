@@ -1,0 +1,14 @@
+dist: xenial
+sudo: required
+install:
+ - sudo apt install golang --allow-unauthenticated -y
+
+before_script:
+ - pushd src/backend
+ - go get github.com/gorilla/websocket
+ - popd
+
+script:
+ - pushd src/backend
+ - go build
+ - cd tests && go test -v
