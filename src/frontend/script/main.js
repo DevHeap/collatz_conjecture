@@ -42,8 +42,6 @@ $(document).ready(function(){
     
     var max_answers = 300; // maximum answers shown at a time
     
-    var max_answers = 300; // maximum answers shown at a time
-    
     var $input = $('#collatzNumber'); // field with a number
     var $button = $('#collatzAction'); // two functional button
     
