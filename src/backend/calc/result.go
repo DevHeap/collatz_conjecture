@@ -18,15 +18,21 @@ func NewResult(seed *big.Int) Result {
 	path := FindPath(seed)
 	elapsed := time.Since(start)
 
+	return NewResultFromPath(path, elapsed)
+}
+
+func NewResultFromPath(path []*big.Int, elapsed time.Duration) Result{
+	seed := path[0]
+
 	// In case of zero path length (numbers from -inf to 1)
 	// Just return bare minimum info
-	if len(path) == 0 {
-		return Result{
-			Number: new(big.Int).Set(seed),
-			PathLength: 0,
-			Time: elapsed,
-		}
-	}
+	//if len(path) == 0 {
+	//	return Result{
+	//		Number: new(big.Int).Set(seed),
+	//		PathLength: 0,
+	//		Time: elapsed,
+	//	}
+	//}
 
 	max    := path[0] //path cannot be empty
 	length := len(path)
@@ -50,4 +56,5 @@ func NewResult(seed *big.Int) Result {
 		AverageNumber: average,
 		Time:          elapsed,
 	}
+
 }

@@ -2,6 +2,8 @@ package calc
 
 import (
 	"math/big"
+	"../calc/cache"
+	"time"
 )
 
 type Calculator struct {
@@ -11,10 +13,10 @@ type Calculator struct {
 	step   *big.Int
 	stopCh chan struct{}
 
-	cache *Cache
+	cache *cache.Cache
 }
 
-func NewCalculator(start *big.Int, workersCount int, cache *Cache) Calculator {
+func NewCalculator(start *big.Int, workersCount int, cache *cache.Cache) Calculator {
 	stopCh := make(chan struct{})
 	dataCh := make(chan Result, 4)
 
@@ -46,13 +48,16 @@ func (c *Calculator) compute(offset int64) {
 	for {
 		select {
 		default:
-			if r, ok := c.cache.Get(number); ok {
-				c.DataCh <- r
+			if path, ok := c.cache.Get(number); ok {
+				c.DataCh <- NewResultFromPath(path, time.Duration(0))
 
 			} else{
-				r = NewResult(number)
-				c.DataCh <- r
-				c.cache.Put(number, &r)
+				start := time.Now()
+				path  := FindPath(number)
+				elapsed := time.Since(start)
+
+				c.DataCh <- NewResultFromPath(path, elapsed)
+				c.cache.Put(number, path)
 			}
 
 			number.Add(number, c.step)

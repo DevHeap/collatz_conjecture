@@ -6,6 +6,7 @@ import (
 	"net/http"
 
 	"../calc"
+	"../calc/cache"
 	"github.com/gorilla/websocket"
 	"time"
 	"strings"
@@ -19,7 +20,7 @@ var upgrader = websocket.Upgrader{
 	CheckOrigin: func(r *http.Request) bool {return true},
 }
 
-var cache = calc.NewCache()
+var pathCache = cache.NewCache()
 
 func WSHandler(w http.ResponseWriter, r *http.Request) {
 	log.Print("Accepted Connection")
@@ -75,7 +76,7 @@ func WSHandler(w http.ResponseWriter, r *http.Request) {
 	}(ws)
 
 	//Create calculator with start number
-	calculator := calc.NewCalculator(number, workers, cache)
+	calculator := calc.NewCalculator(number, workers, pathCache)
 	defer calculator.Stop()
 
 	//Cause we can be too fast in sending results to client, we limit it
