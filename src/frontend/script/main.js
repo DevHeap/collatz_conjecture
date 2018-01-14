@@ -21,14 +21,27 @@ Math.collatzSequence = function(num){
 // when page is ready
 $(document).ready(function(){
 
-    // localhost replace
-    var host = (location.host.length == 0) ? 'collatz.devheap.org' : location.host;
-    // server url (ws/wss)
-    var ws_url = 'wss://' + host + '/ws'; // test server: 'wss://echo.websocket.org'
+    // default ws address if front launched from file
+    var def_host = 'collatz.devheap.org';
+    var def_proto = 'wss:';
+    
+    // host and protocol
+    var ws_host, ws_proto;
+    switch(location.protocol){
+        case 'https:': ws_host = location.host; ws_proto = 'wss:'; break;
+        case 'http:': ws_host = location.host; ws_proto = 'ws:'; break;
+        case 'file:': default: ws_host = def_host; ws_proto = def_proto; break;
+    }
+    
+    // ws server url
+    var ws_url = ws_proto + '//' + ws_host + '/ws'; // test server: 'wss://echo.websocket.org'
+    
     var ws; // global scope for websocket instance
     
-    var minimum = 3; // 1 is done, 2 is only 1 step, 3 is okay.
-    var maximum = 4 * 8 * 15 * 16 * 23 * 42 * 108; // DHARMA INITIATIVE
+    var n_minimum = 1; // collatz min
+    var n_maximum = 999999999999999; // js max
+    
+    var max_answers = 300; // maximum answers shown at a time
     
     var $input = $('#collatzNumber'); // field with a number
     var $button = $('#collatzAction'); // two functional button
@@ -116,16 +129,16 @@ $(document).ready(function(){
         
         counter++;
         
-        var result, itemid, maximum = 100;
+        var result, itemid;
         
         // prepare string
         if (typeof data === 'object'){
             var elements = [
                 'Number: ' + data['Number'],
-                'Path length: ' + data['PathLength'],
-                'Highest: ' + data['MaxNumber'],
+                'Length: ' + data['PathLength'],
+                'Maximum: ' + data['MaxNumber'],
                 'Average: ' + data['AverageNumber'],
-                'Calc time: ' + (data['Time']/1000000) + 'ms',
+                'Time: ' + (data['Time']/1000000) + 'ms',
             ];
             result = elements.join(', ');
             itemid = 'number_' + data['Number'];
@@ -138,8 +151,9 @@ $(document).ready(function(){
         $answers.queue(function(){
             // limit shown elements by removing oldest
             var size = $answers.children().length;
-            if((size > maximum) && (size % (maximum / 3) == 0)){ // let 1/3 more of max to stay
-                $answers.children().remove(":lt(" + (size - maximum) + ")");
+            if((size > max_answers) && (size % Math.floor(max_answers / 3) == 0)){ // let 1/3 more of max to stay
+                $answers.children().remove(":lt(" + (size - max_answers) + ")");
+                Scroll.update($answers[0]); // better smooth scroll
             }
             // add result
             var item = createItem(result, itemid);
@@ -161,8 +175,9 @@ $(document).ready(function(){
             // Histogram.add(Math.logRand(1,666)); // TESTing (histogram)
         }
         if(Histogram.outdated(interval)){
-            Plotly.restyle($histogram[0], 'y', [Histogram.values]);
-            // Plotly.relayout($histogram[0], {y: Histogram.values});
+            // Plotly.restyle($histogram[0], 'y', [Histogram.values]);
+            // still don't know which is better (restyle vs relayout)
+            Plotly.relayout($histogram[0], {y: Histogram.values});
         }
     }
     
@@ -175,6 +190,12 @@ $(document).ready(function(){
     
     function doAction(){
         
+        // show results block
+        $results.slideDown(500, function(){
+            // show debug output
+            $debug.slideDown(500); 
+        });
+        
         if($button.attr('data-opened') == 'false'){
             
             $button.attr('disabled','disabled').val('Connecting...');
@@ -185,7 +206,15 @@ $(document).ready(function(){
             
             // histogram init
             Histogram.reset();
-            Plotly.newPlot($histogram[0], [{y: Histogram.values, type: 'bar'}], {showlegend: false}, {staticPlot: true}); // plot
+            var margin = 40; // histogram border margin in px
+            var font = { family: "Cuprum, sans-serif", size: 15, color: "#1f1f1f" };
+            var layout = {
+                margin: { l: margin, r: margin, b: margin, t: margin, pad: margin/8 },
+                xaxis: { title : "Path length", titlefont: font, tickfont: font },
+                yaxis: { title : "Count", titlefont: font, tickfont: font },
+                showlegend: false,
+            };
+            Plotly.newPlot($histogram[0], [{y: Histogram.values, type: 'bar'}], layout, {staticPlot: true}); // plot
             $(window).on('resize', function(){
                 Plotly.Plots.resize($histogram[0]);
             });
@@ -244,8 +273,20 @@ $(document).ready(function(){
         
     }
     
+    function filterN(){
+        var defval = '1';
+        var val = $input.val().replace(/^0+/, '').replace(/[^0-9]/gi, '');
+        val = val == '' ? defval : val; 
+        $input.val(val);
+    }
+    
+    function randN(){
+        $input.val(Math.logRand(n_minimum, n_maximum));
+    }
+    
     function example(){
         var value = $input.val();
+        var value = value ? value : '0';
         var result = Math.collatzSequence(value);
         $example.text('Path for '+ value +' is ' + result.join(' > '));
     }
@@ -253,11 +294,6 @@ $(document).ready(function(){
     $button.attr('data-opened', 'false');
     
     $button.on('click',  function(ev){
-        // show results block
-        $results.slideDown(500, function(){
-            // show debug output
-            $debug.slideDown(500); 
-        });
         doAction();
     });
 
@@ -265,23 +301,27 @@ $(document).ready(function(){
         $example.toggleClass('collapsed');
     });
     
-    $input.on('keyup', function(ev){
-        if(ev.keyCode == 13){ doAction(); }
-        $(this).val($(this).val().replace(/[^0-9]/g, ''));
+    $input.on('change', function(ev){
+        filterN();
         example();
     });
     
-    $input.on('change', function(ev){
-        $(this).val($(this).val().replace(/[^0-9]/g, ''));
+    $input.on('keyup', function(ev){
+        if(ev.keyCode != 8){ // backspace
+            filterN();
+        }
+        if(ev.keyCode == 13){ // Enter
+            doAction();
+        }
         example();
     });
     
     $random.on('click', function(ev){
-        $input.val(Math.logRand(minimum, maximum));
+        randN();
         example();
     });
     
-    $input.val(Math.logRand(minimum, maximum));
+    randN();
     example();
     
 });

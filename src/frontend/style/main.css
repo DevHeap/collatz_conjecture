@@ -205,7 +205,9 @@ body { font-family: Cuprum, sans-serif; }
 }
 .collatz-form-item + .collatz-form-item { margin-top: 1rem; }
 
-#collatzNumber { }
+#collatzNumber {
+    font-size: 5.25rem; line-height: 1;
+}
 
 #collatzAction {
     min-width: 40%;
@@ -234,23 +236,13 @@ body { font-family: Cuprum, sans-serif; }
 }
 
 #collatzOutput {
-    padding: 0.5rem;
-    position: relative;
-    overflow-x: hidden;
-    overflow-y: scroll;
+    padding: 0.5rem; position: relative;
+    overflow-x: hidden; overflow-y: scroll;
 }
 
 #collatzOutput.autoscroll {
     overflow-y: hidden;
 }
-
-/*#collatzOutput::after{
-    display: block; content: "";
-    position: sticky;
-    bottom: -0.5rem; left: 0; right: 0;
-    height: 2rem; margin-top: -2rem;
-    background: linear-gradient(to bottom, rgba(255,255,255,0), rgba(255,255,255,1));
-}*/
 
 #collatzOutput .item {
     height: 3.5rem; padding: 0.5rem 1rem;
@@ -290,6 +282,12 @@ body { font-family: Cuprum, sans-serif; }
     display: none;
     font-size: 2rem;
     font-family: monospace;
+}
+
+@media (max-width: 720px) {
+    #collatzOutput .item {
+        height: auto; white-space: normal;
+    }
 }
 
 
