@@ -66,7 +66,6 @@ func (s *Storage) Get(number *big.Int) ([]*big.Int, bool){
 	key := number.String()
 
 	if d, ok := s.payload[key]; ok {
-		log.Println("Cache hit" + key)
 		return d.path, true
 	}
 	return nil, false
