@@ -2,7 +2,6 @@ package cache
 
 import (
 	"math/big"
-	"log"
 )
 
 type Storage struct {
