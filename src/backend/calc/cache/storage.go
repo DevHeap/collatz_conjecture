@@ -29,6 +29,7 @@ func (s *Storage) put(key string, value []*big.Int){
 
 	if exist {
 		s.payload[key].count += 1
+		s.payload[key].path = value
 
 	} else {
 		s.payload[key] = &data{count: 0, path: value}

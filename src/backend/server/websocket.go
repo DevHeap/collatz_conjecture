@@ -20,7 +20,7 @@ var upgrader = websocket.Upgrader{
 	CheckOrigin: func(r *http.Request) bool {return true},
 }
 
-var pathCache = cache.NewCache()
+var pathCache = cache.NewCacheDefault()
 
 func WSHandler(w http.ResponseWriter, r *http.Request) {
 	log.Print("Accepted Connection")

@@ -15,10 +15,15 @@ type Cache struct{
 	storage Storage
 }
 
+const DefaultMaxCount = 300
 
-func NewCache() *Cache{
+func NewCacheDefault() *Cache {
+	return NewCache(DefaultMaxCount)
+}
+
+func NewCache(maxCount int) *Cache{
 	return &Cache{
-		maxCount:  300,
+		maxCount:  maxCount,
 
 		minLength: 0,
 
@@ -27,16 +32,25 @@ func NewCache() *Cache{
 	}
 }
 
-func (c *Cache) Put(number *big.Int, path []*big.Int) {
-	c.Lock()
-	defer c.Unlock()
+func (c *Cache) Put(path []*big.Int) {
+	c.RLock()
 
-
-	if !(c.index.Size() < c.maxCount || len(path) > c.minLength) {
+	if len(path) < 1{
+		// TODO log this is abnormal
+		c.RUnlock()
 		return
 	}
 
-	key := number.String()
+	if !(c.index.Size() < c.maxCount || len(path) > c.minLength) {
+		c.RUnlock()
+		return
+	}
+
+	c.RUnlock()
+	c.Lock()
+	defer c.Unlock()
+
+	key := path[0].String()
 
 	// Insert into index
 	c.index.Update(key, len(path))
@@ -61,5 +75,6 @@ func (c *Cache) Put(number *big.Int, path []*big.Int) {
 func (c *Cache) Get(number *big.Int) ([]*big.Int, bool) {
 	c.RLock()
 	defer c.RUnlock()
+
 	return c.storage.Get(number)
 }

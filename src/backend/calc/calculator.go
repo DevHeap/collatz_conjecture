@@ -57,7 +57,7 @@ func (c *Calculator) compute(offset int64) {
 				elapsed := time.Since(start)
 
 				c.DataCh <- NewResultFromPath(path, elapsed)
-				c.cache.Put(number, path)
+				c.cache.Put(path)
 			}
 
 			number.Add(number, c.step)
