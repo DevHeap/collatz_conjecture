@@ -3,6 +3,8 @@ package cache
 import (
 	"math/big"
 	"sync"
+	"os"
+	"log"
 )
 
 type Cache struct{
@@ -13,6 +15,8 @@ type Cache struct{
 
 	index   Index
 	storage Storage
+
+	db *Database
 }
 
 const DefaultMaxCount = 300
@@ -21,18 +25,49 @@ func NewCacheDefault() *Cache {
 	return NewCache(DefaultMaxCount)
 }
 
-func NewCache(maxCount int) *Cache{
-	return &Cache{
+func NewCache(maxCount int) *Cache {
+	db, err := NewDatabase()
+
+	if err != nil {
+		log.Print("Failed to connect to to database: ", err)
+		os.Exit(1)
+	}
+
+	cache := &Cache{
 		maxCount:  maxCount,
 
 		minLength: 0,
 
 		index:   NewIndex(),
 		storage: NewStorage(),
+
+		db: db,
 	}
+
+	entries, err := db.Load()
+	if err != nil {
+		log.Print("Failed to load cache: ", err)
+		os.Exit(1)
+	}
+
+	for _, value := range entries {
+		cache.PutLocal(value)
+	}
+
+
+	log.Print("Cache initialized successfuly")
+	return cache
 }
 
 func (c *Cache) Put(path []*big.Int) {
+	c.put(path, true)
+}
+
+func (c *Cache) PutLocal(path []*big.Int) {
+	c.put(path, false)
+}
+
+func (c *Cache) put(path []*big.Int, updateDb bool) {
 	c.RLock()
 
 	if len(path) < 1{
@@ -57,20 +92,25 @@ func (c *Cache) Put(path []*big.Int) {
 
 	// If index contains more than max count, remove minimal
 	if c.index.Size() > c.maxCount {
-		c.storage.Rem(c.index.MinKey())
+		minKey := c.index.MinKey()
+		c.storage.Rem(minKey)
 		c.index.RemMin()
+		// Deletion should stay in case of race condition happened during
+		// shutdown, resulting in having >300 entries in DB
+		c.db.DeleteByKeyAsync(minKey)
 	}
 
 	// Putting new data into map
 	c.storage.Put(path)
 
 	// Updating minimal length
-	 c.minLength = c.index.MinLength()
+	c.minLength = c.index.MinLength()
 
-	// TODO update database here
+	if updateDb {
+		// Updating database
+		c.db.InsertAsync(path[0], path)
+	}
 }
-
-
 
 func (c *Cache) Get(number *big.Int) ([]*big.Int, bool) {
 	c.RLock()

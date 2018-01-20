@@ -21,10 +21,28 @@ services:
     container_name: collatz
     networks:
       - local-web
-    
+      - local-db
+  
+  postgres:
+    restart: unless-stopped
+    image: postgres:10
+    container_name: postgres
+    networks:
+      - local-web
+      - local-db
+    environment:
+      POSTGRES_PASSWORD: collatz
+    volumes:
+      - dbdata:/var/lib/postgresql/data
 
 networks:
   local-web:
     driver: bridge
     name: local-web
+  local-db:
+    driver: bridge
+    name: local-db
 
+volumes:
+  dbdata:
+    name: dbdata
