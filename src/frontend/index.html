@@ -43,7 +43,7 @@ type="button" value="Start">
                             <div class="button" id="collatzRandom">Randomize</div>
                         </div>
                         
-                        <p>Enter any number (n > 0) and press Start.</p>
+                        <p>Enter any positive integer and press Start.</p>
                         
                     </div>
                     
@@ -92,9 +92,10 @@ disabled></textarea>
                     
                         <h4>Collatz Conjecture</h4>
                         <p>
-                            If n1 is even then n2 = 1/2 n; if n1 is odd then n2 = 3n + 1.<br>
-                            By doing these two operations you will always come to 1.<br>
-                            Every n is a part of sequence. Stop on n = 1.
+                            If n1 is even then n<sub>2</sub> = 1/2 * n<sub>1</sub>; if n1 is odd then n<sub>2</sub> = 3*n<sub>1</sub> + 1.<br>
+                            Continue doing it as much as needed.<br>
+                            Collatz conjecture claims that by doing these two operations you will eventually come to 1.<br>
+                            The resulting sequence from initial number to 1 is called Collatz path.
                         </p>
                         
                         <h4>Sequence Example</h4>
