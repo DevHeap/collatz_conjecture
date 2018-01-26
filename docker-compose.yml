@@ -1,15 +1,5 @@
 version: '3.5'
 services:
-
-  collatz:
-    restart: unless-stopped
-    image: devheaporg/collatz_conjecture:latest-dev
-    container_name: collatz
-    ports:
-      - "80:80"
-    networks:
-      - collatz
-  
   postgres:
     restart: unless-stopped
     image: postgres:10
@@ -18,8 +8,31 @@ services:
       - collatz
     environment:
       POSTGRES_PASSWORD: collatz
+      POSTGRES_DB: postgres
     volumes:
       - dbdata:/var/lib/postgresql/data
+
+  postgres_init:
+    depends_on:
+      - postgres
+    image: postgres:10
+    container_name: postgres_init
+    networks:
+      - collatz
+    environment:
+      PGPASSWORD: collatz
+    command: bash -c "for i in $$(seq 3); do echo Initializing DB, attempt $$i; sleep 2; psql -h postgres -U postgres -c 'CREATE DATABASE collatz;'; done; exit 0"
+
+  collatz:
+    depends_on:
+      - postgres_init
+    restart: unless-stopped
+    image: devheaporg/collatz_conjecture:latest-dev
+    container_name: collatz
+    ports:
+      - "80:80"
+    networks:
+      - collatz  
 
 networks:
   collatz:
