@@ -29,30 +29,46 @@
                     
                 <div class="ngrid cont">
                 
-                    <div class="part part-md p1of2">
+                    <div class="part part-lg p2of5">
                         
-                        <div class="form-line">
-                            <input class="collatz-form-item field" id="collatzNumber" type="text" value="0" required>
-                        </div>
-                    
-                        <div class="form-line">
-                            <input class="collatz-form-item button" id="collatzAction" type="button" value="Start">
-                            <div class="button" id="collatzRandom">Randomize</div>
-                        </div>
+                        <div class="ngrid cont">
                         
-                        <p>Enter any positive integer and press Start.</p>
+                            <div class="part part-sm p3of5">
+                                <div class="form-line">
+                                    <input class="collatz-form-item field" id="collatzNumber" type="text" value="" required placeholder="Enter any number">
+                                </div>
+                            </div>
+                            
+                            <div class="part part-sm p2of5">
+                                <div class="form-line">
+                                    <input class="collatz-form-item field button" id="collatzAction" type="button" value="Start">
+                                </div>
+                            </div>
+                            
+                        </div>
+                            
+                        <div class="button" id="collatzRandom">RANDOM</div>
+                        
+                        <!--div class="form-line">
+                            <textarea class="field collatz-form-item" id="collatzDebug" rows="5" disabled></textarea>
+                        </div-->
                         
                     </div>
                     
-                    <div class="part part-md p1of2">
+                    <div class="part part-lg p3of5">
                         
-                        <div class="form-line">
-                            <textarea class="field collatz-form-item" id="collatzDebug" rows="5" disabled></textarea>
-                        </div>
+                        <p>
+                            Let's take a positive integer number and perform the following actions:<br>
+                            If n<sub>1</sub> is even then n<sub>2</sub> = 1/2 * n<sub>1</sub>
+                            and if n<sub>1</sub> is odd then n<sub>2</sub> = 3 * n<sub>1</sub> + 1.<br>
+                            Collatz conjecture claims that if you continue performing these two operations you will eventually come to 1. The resulting sequence is called Collatz path.
+                        </p>
                     
                     </div>
                     
                 </div>
+                
+                <div id="collatzExample" class="collapsed">Calculating...</div>
             
             </div>
             
@@ -72,7 +88,14 @@
                         
                         <div class="header h3">Answers</div>
                         
-                        <div id="collatzOutput"></div>
+                        <div id="collatzAnswers">
+                            <div class="item bg-light" id="collatzOutputLegend">
+                                <span>Number</span><span>Path Length</span><span>Maximum</span><span>Average</span><span>Time</span>
+                            </div>
+                            <div id="collatzOutput">
+                            
+                            </div>
+                        </div>
                     
                     </div>
                     
@@ -80,36 +103,9 @@
             
             </div>
         
-            <div class="content-m bg-gr-deep-blue">
+            <div class="content-wm content-hs bg-gr-danger bg-under">
                 
-                <div class="ngrid cont">
-                
-                    <div class="part part-md p1of2">
-                    
-                        <h4>Collatz Conjecture</h4>
-                        <p>
-                            Let's take a positive integer number and perform the following actions:<br>
-                            If n<sub>1</sub> is even then n<sub>2</sub> = 1/2 * n<sub>1</sub>; if n<sub>1</sub> is odd then n<sub>2</sub> = 3*n<sub>1</sub> + 1.<br>
-                            Continue doing it as much as needed.<br>
-                            Collatz conjecture claims that by doing these two operations you will eventually come to 1.<br>
-                            The resulting sequence from initial number to 1 is called Collatz path.
-                        </p>
-                        
-                        <h4>Sequence Example</h4>
-                        <div id="collatzExample" class="collapsed">Calculating...</div>
-                        
-                    </div>
-                    
-                    <div class="part part-md p1of2">
-                    
-                        <h4>Server Features and Optimizations</h4>
-                        <p>Ask Alyona: @NIMFETRISA</p>
-                        
-                        <p>Developed by <a href="//devheap.org">DevHeap</a> team.</p>
-                        
-                    </div>
-                    
-                </div>
+                <p class="tright">developed by team <a href="https://devheap.org">DevHeap</a></p>
             
             </div>
             
