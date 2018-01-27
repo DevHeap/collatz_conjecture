@@ -11,7 +11,7 @@ import (
 func TestSimpleGet(t *testing.T) {
 	// Simple test for base functionality of Get and Put
 
-	cache := cache.NewCacheDefault()
+	cache := cache.NewCacheDummyDatabase()
 
 	number, _ := new(big.Int).SetString("42", 10)
 	storedPath := calc.FindPath(number)
@@ -31,7 +31,7 @@ func TestMultipleGet(t *testing.T) {
 	// Now we adding path and try to get number in this path (for sub path)
 	// For 42 path is 42 > 21 > 64 > 32 > 16 > 8 > 4 > 2 > 1
 
-	cache := cache.NewCacheDefault()
+	cache := cache.NewCacheDummyDatabase()
 
 	number, _ := new(big.Int).SetString("42", 10)
 

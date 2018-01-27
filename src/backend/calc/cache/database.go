@@ -10,6 +10,16 @@ import (
 	"strings"
 )
 
+type DB interface {
+	Load() (map[*big.Int][]*big.Int, error)
+	Insert(number *big.Int, path []*big.Int) error
+	InsertAsync(number *big.Int, path []*big.Int)
+    Delete(number *big.Int) error
+	DeleteAsync(number *big.Int)
+    DeleteByKey(key string) error
+	DeleteByKeyAsync(key string)
+}
+
 type Database struct {
 	db *sql.DB
 	loadStmt   *sql.Stmt
@@ -201,4 +211,41 @@ func deserializeBigints(serialized []byte) ([]*big.Int, error) {
 	}
 
 	return path, nil
+}
+
+type DummyDatabase struct {
+
+}
+
+func NewDummyDatabase() *DummyDatabase {
+	return &DummyDatabase{}
+}
+
+func (d *DummyDatabase) Load() (map[*big.Int][]*big.Int, error) {
+	emptyCache := make(map[*big.Int][]*big.Int)
+	return emptyCache, nil
+}
+
+func (d *DummyDatabase) Insert(number *big.Int, path []*big.Int) error {
+	return nil
+}
+
+func (d *DummyDatabase) InsertAsync(number *big.Int, path []*big.Int) {
+
+}
+
+func (d *DummyDatabase) Delete(number *big.Int) error {
+	return nil
+}
+
+func (d *DummyDatabase) DeleteAsync(number *big.Int) {
+
+}
+
+func (d *DummyDatabase) DeleteByKey(key string) error {
+	return nil
+}
+
+func (d *DummyDatabase) DeleteByKeyAsync(key string) {
+
 }

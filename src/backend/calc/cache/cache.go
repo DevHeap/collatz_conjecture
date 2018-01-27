@@ -16,16 +16,12 @@ type Cache struct{
 	index   Index
 	storage Storage
 
-	db *Database
+	db DB
 }
 
 const DefaultMaxCount = 300
 
 func NewCacheDefault() *Cache {
-	return NewCache(DefaultMaxCount)
-}
-
-func NewCache(maxCount int) *Cache {
 	db, err := NewDatabase()
 
 	if err != nil {
@@ -33,6 +29,15 @@ func NewCache(maxCount int) *Cache {
 		os.Exit(1)
 	}
 
+	return NewCache(DefaultMaxCount, db)
+}
+
+func NewCacheDummyDatabase() *Cache {
+	db := NewDummyDatabase()
+	return NewCache(DefaultMaxCount, db)
+}
+
+func NewCache(maxCount int, db DB) *Cache {
 	cache := &Cache{
 		maxCount:  maxCount,
 
