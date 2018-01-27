@@ -13,20 +13,42 @@ import (
 )
 
 const base = 10
-const workers = 4
-const maxMsgRatio = time.Millisecond * 200
 
-var upgrader = websocket.Upgrader{
-	CheckOrigin: func(r *http.Request) bool {return true},
+type WSServer struct {
+	workers int
+	maxMsgRatio time.Duration
+
+	pathCache *cache.Cache
+
+	upgrader websocket.Upgrader
 }
 
-var pathCache = cache.NewCacheDefault()
+func NewWSServer(
+	workers int,
+	maxMsgRatio time.Duration,
+	checkOrigin bool,
+	pathCache *cache.Cache,
+	) *WSServer  {
 
-func WSHandler(w http.ResponseWriter, r *http.Request) {
+	upgrader := websocket.Upgrader{}
+
+	if !checkOrigin {
+		upgrader.CheckOrigin = func(r *http.Request) bool {return true}
+	}
+
+	return &WSServer{
+		workers:workers,
+		maxMsgRatio:maxMsgRatio,
+		pathCache: pathCache,
+		upgrader: upgrader,
+	}
+}
+
+func (s * WSServer )WSHandler(w http.ResponseWriter, r *http.Request) {
 	log.Print("Accepted Connection")
 
 	//Upgrading protocol to websocket connection
-	ws, err := upgrader.Upgrade(w, r, nil)
+	ws, err := s.upgrader.Upgrade(w, r, nil)
 	defer ws.Close()
 
 	if err != nil {
@@ -76,11 +98,11 @@ func WSHandler(w http.ResponseWriter, r *http.Request) {
 	}(ws)
 
 	//Create calculator with start number
-	calculator := calc.NewCalculator(number, workers, pathCache)
+	calculator := calc.NewCalculator(number, s.workers, s.pathCache)
 	defer calculator.Stop()
 
 	//Cause we can be too fast in sending results to client, we limit it
-	limiter := time.NewTicker(maxMsgRatio)
+	limiter := time.NewTicker(s.maxMsgRatio)
 	defer limiter.Stop()
 
 	//Main handler loop
