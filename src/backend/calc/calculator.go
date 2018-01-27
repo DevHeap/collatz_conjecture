@@ -4,13 +4,16 @@ import (
 	"math/big"
 	"../calc/cache"
 	"time"
+	"sync"
 )
+
 
 type Calculator struct {
 	DataCh chan Result
 
-	start  *big.Int
-	step   *big.Int
+	next  *big.Int
+	step  *big.Int
+	guard sync.Mutex
 	stopCh chan struct{}
 
 	cache *cache.Cache
@@ -23,8 +26,8 @@ func NewCalculator(start *big.Int, workersCount int, cache *cache.Cache) Calcula
 	calculator := Calculator{
 		DataCh: dataCh,
 
-		start:  start,
-		step:   big.NewInt(int64(workersCount)),
+		next:  start,
+		step:  new(big.Int).SetInt64(1),
 		stopCh: stopCh,
 
 		cache: cache,
@@ -41,13 +44,20 @@ func (c *Calculator) Stop() {
 	close(c.stopCh)
 }
 
-func (c *Calculator) compute(offset int64) {
-	number := new(big.Int).Set(c.start)
-	number.Add(number, big.NewInt(offset))
+func (c *Calculator) getNextNumber() *big.Int {
+	c.guard.Lock()
+	next := c.next
+	c.next = c.next.Add(c.next, c.step)
+	c.guard.Unlock()
+	return next
+}
 
+func (c *Calculator) compute(offset int64) {
 	for {
 		select {
 		default:
+			number := c.getNextNumber()
+
 			if path, ok := c.cache.Get(number); ok {
 				c.DataCh <- NewResultFromPath(path, time.Duration(0))
 
@@ -59,9 +69,6 @@ func (c *Calculator) compute(offset int64) {
 				c.DataCh <- NewResultFromPath(path, elapsed)
 				c.cache.Put(path)
 			}
-
-			number.Add(number, c.step)
-
 		case <-c.stopCh:
 			return
 		}
