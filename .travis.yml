@@ -1,11 +1,13 @@
 dist: xenial
 sudo: required
 install:
+ - sudo apt update
  - sudo apt install golang --allow-unauthenticated -y
 
 before_script:
  - pushd src/backend
  - go get github.com/gorilla/websocket
+ - go get github.com/lib/pq
  - popd
 
 script:
