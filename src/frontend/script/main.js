@@ -41,8 +41,6 @@ $(document).ready(function(){
     var n_minimum = 1; // collatz min
     var n_maximum = 999999999999999; // js max
     
-    var max_answers = 300; // maximum answers shown at a time
-    
     var $input = $('#collatzNumber'); // field with a number
     var $button = $('#collatzAction'); // two functional button
     
@@ -54,14 +52,29 @@ $(document).ready(function(){
     var $answers = $('#collatzOutput'); // place to output results
     
     var $example = $('#collatzExample'); // example placeholder
-
+            
     // Histogram singleton for collecting stats
     Histogram = {
-        values: [0], total: 0, maximum: 0, time: 0,
-        reset: function(){
+        values: [0], total: 0, maximum: 0,
+        time: 0, interval: 2, temp: $('<div>'), element: null,
+        init: function(element){
+            this.element = element;
             this.values = [0];
             this.total = 0;
             this.maximum = 0;
+            // plot style
+            var margin = 40; // histogram border margin in px
+            var font = { family: "Cuprum, sans-serif", size: 15, color: "#1f1f1f" };
+            var layout = {
+                margin: { l: margin, r: margin, b: margin, t: margin, pad: margin/8 },
+                xaxis: { title : "Path length", titlefont: font, tickfont: font },
+                yaxis: { title : "Count", titlefont: font, tickfont: font },
+                showlegend: false,
+            };
+            // new plot
+            Plotly.newPlot(this.temp[0], [{y: this.values, type: 'bar'}], layout, {staticPlot: true});
+            $(window).on('resize', function(){ Histogram.resizeView(); });
+            this.resizeView();
         },
         add: function(value){
             if(this.values.length < value + 1){
@@ -74,38 +87,83 @@ $(document).ready(function(){
                 this.maximum = this.values[value];
             }
         },
-        print: function(){
-            return this.values.reduce(function(a, b, i){
-                return a + ', ' + i + ':' + b;
-            });
-        },
         outdated: function(sec){
             if((Date.now() - this.time) > (sec * 1000)){
                 this.time = Date.now();
                 return true;
             } else return false;
         },
+        update: function(data){
+            if (typeof data === 'object'){
+                this.add(data['PathLength']);
+            }
+            if(this.outdated(this.interval)){
+                this.updateView();
+            }
+        },
+        updateView: function(){
+                var deferred = $.Deferred();
+                deferred.done(function() {
+                    setTimeout(function(){
+                        Histogram.element.html('');
+                        Histogram.element.append(Histogram.temp.clone());
+                    }, Histogram.interval * 1000 / 2);
+                });
+                deferred.resolve(Plotly.restyle(Histogram.temp[0], 'y', [Histogram.values]));
+        },
+        resizeView: function(){
+            this.temp.width(this.element.width());
+            this.temp.height(this.element.height());
+            Plotly.Plots.resize(this.temp[0]);
+        },
+        print: function(){
+            return this.values.reduce(function(a, b, i){
+                return a + ', ' + i + ':' + b;
+            });
+        }
     };
     
     Answers = {
-        maximum: 0, element: $answers,
+        maximum: 0, maxAnswers: 360, element: null,
         itemClass: 'item', itemId: 'item', itemUpdated: 'filled',
-        add: function(id, content){
-            if(id > this.maximum){ this.blocks(id); }
+        init: function(element, value){
+            this.element = element;
+            this.maximum = value-1;
+            this.blocks(value-1);
+        },
+        add: function(data){
+            // remove old
+            if(this.element.children().length > (this.maxAnswers + Math.floor(this.maxAnswers / 3))){
+                this.removeOld();
+                Scroll.update(Answers.element[0]);
+            }
+            // prepare string
+            if (typeof data === 'object'){
+                var fields = [data['Number'], data['PathLength'], data['MaxNumber'],
+                              data['AverageNumber'], (data['Time']/1000000)+' ms'];
+                content = "<span>" + fields.join('</span><span>') + "</span>";
+                id = data['Number'];
+            } else { content = data; id = 0; }
+            // create blocks
+            if(id >= this.maximum){ this.blocks(id); }
+            // add result
             $('#'+this.itemId+'_'+id).html(content).addClass(this.itemUpdated);
+            // scroll smoothly
+            Scroll.smooth(Answers.element);
         },
         blocks: function(number){
             if(this.element != null){
                 for(var i=this.maximum; i<number; i++){
-                    var item = '<div class="'+this.itemClass+'" id="'+this.itemId+'_'+(i+1)+'">...</div>';
-                    this.element.append(item);
+                    var deferred = $.Deferred();
+                    deferred.done(function(item) { Answers.element.append(item); });
+                    var item = $('<div class="'+this.itemClass+'" id="'+this.itemId+'_'+(i+1)+'">...</div>');
+                    deferred.resolve(item);
                 }
                 this.maximum = number;
             }
         },
-        format: function(obj){
-            var fields = [obj['Number'], obj['PathLength'], obj['MaxNumber'], obj['AverageNumber'], (obj['Time']/1000000)+' ms'];
-            return "<span>" + fields.join('</span><span>') + "</span>";
+        removeOld: function(){
+            this.element.children().remove(":lt(" + (this.element.children().length - this.maxAnswers) + ")");
         }
     };
     
@@ -116,9 +174,6 @@ $(document).ready(function(){
         moving: function(){
             return (this.position < this.target);
         },
-        ready: function(){
-            return (Date.now() - this.time) > (this.interval);
-        },
         update: function(el){
             this.height = el.scrollHeight;
             this.position = el.scrollTop + el.clientHeight;
@@ -126,65 +181,15 @@ $(document).ready(function(){
         },
         smooth: function(element){
             this.update(element[0]);
-            if(this.moving() && this.ready()){
+            if(this.moving() && (Date.now() - this.time) > this.interval){
+                this.time = Date.now();
+                // element.scrollTop(Scroll.target - element.height() - 1); /*
                 element.animate({
                     scrollTop: (this.target - element.height() - 1)
-                }, this.interval - 10, 'linear');
-                this.time = Date.now();
+                }, this.interval - 50, 'linear'); //*/
             }
-        },
-    };
-    
-    // adds answer
-    function addAnswer(data){
-        
-        var result = '', itemid = '';
-        
-        // prepare string
-        if (typeof data === 'object'){
-            result = Answers.format(data);
-            itemid = data['Number'];
-        } else { result = data; }
-        
-        // queue
-        $answers.queue(function(){
-        
-            // limit shown elements by removing oldest
-            var size = $answers.children().length;
-            if((size > max_answers) && (size % Math.floor(max_answers / 3) == 0)){ // let 1/3 more of max to stay
-                $answers.children().remove(":lt(" + (size - max_answers) + ")");
-                Scroll.update($answers[0]); // better smooth scroll
-            }
-            
-            // add result
-            Answers.add(itemid, result);
-            
-            // scroll smoothly
-            Scroll.smooth($answers);
-            
-            // next please
-            $(this).dequeue();
-            
-        });
-        
-    }
-    
-    function updateHistogramView(interval){
-        if(Histogram.outdated(interval)){
-            var rand = Math.round(Math.random() * 100);
-            setTimeout(function(){
-                Plotly.restyle($histogram[0], 'y', [Histogram.values]);
-                // still don't know which is better (restyle vs relayout).
-                // Plotly.relayout($histogram[0], {y: Histogram.values});
-            }, rand); // if it is not async then i am dumb
         }
-    }
-    
-    // updates histogram
-    function updateHistogram(data){
-        if (typeof data === 'object'){ Histogram.add(data['PathLength']); }
-        updateHistogramView(2);
-    }
+    };
     
     // onpage log
     function logDebug(data){
@@ -210,21 +215,8 @@ $(document).ready(function(){
             $answers.children().remove();
             $answers.addClass('autoscroll');
             
-            // histogram data init
-            Histogram.reset();
-            
-            // histogram view style
-            var margin = 40; // histogram border margin in px
-            var font = { family: "Cuprum, sans-serif", size: 15, color: "#1f1f1f" };
-            var layout = {
-                margin: { l: margin, r: margin, b: margin, t: margin, pad: margin/8 },
-                xaxis: { title : "Path length", titlefont: font, tickfont: font },
-                yaxis: { title : "Count", titlefont: font, tickfont: font },
-                showlegend: false,
-            };
-            // plot
-            Plotly.newPlot($histogram[0], [{y: Histogram.values, type: 'bar'}], layout, {staticPlot: true});
-            $(window).on('resize', function(){ Plotly.Plots.resize($histogram[0]); });
+            // histogram init
+            Histogram.init($histogram);
             
             // scroll to results
             $('html, body').animate({ scrollTop: $results.offset().top }, 500);
@@ -243,20 +235,26 @@ $(document).ready(function(){
                 var val = $input.val();
                 ws.send(val);
                 logDebug('Message sent: ' + val);
-                Answers.maximum = val;
+                Answers.init($answers, val);
             
                 $button.attr('data-opened', 'true').removeAttr('disabled').val('Stop');
             };
             
             ws.onmessage = function(ev){
-                var data = $.parseJSON(ev.data);
-                $answers.queue(function(){ addAnswer(data); $(this).dequeue(); });
-                $histogram.queue(function(){ updateHistogram(data); $(this).dequeue(); });
+            
+                var deferred = $.Deferred();
+
+                deferred.done(function(data) {
+                    Answers.add(data);
+                    Histogram.update(data);
+                });
+
+                deferred.resolve($.parseJSON(ev.data));
+                
             };
             
             ws.onerror = function(){
-                logDebug('An error has occurred');
-                addAnswer('Something gone wrong...');
+                logDebug('Connection error');
             };
             
             ws.onclose = function(ev){
